@@ -1,0 +1,92 @@
+# Không giới hạn thời gian chạy
+Bước không giới hạn thời gian chạy, các bác có thể bỏ qua nếu như treo máy copy dưới 1 tiếng. Còn nếu treo máy copy lâu thì nên thực hiện để tránh trường hợp google colab tự ngắt kết nối
+*Nhấn* tổ hợp phím ctrl + Shift + I và chuyển sang tab console và dán đoạn mã sau đây, nhấn enter và để thế, không được tắt.
+
+<b> Tuyệt đối không tắt trình duyệt trong quá trình copy </b>
+<code>function ClickConnect(){
+console.log("Working");
+document.querySelector("colab-connect-button").click()
+}setInterval(ClickConnect,6000)</code>
+#@markdown <h3>←Chạy cái này để google colab thực hiện lệnh vượt quá 60 phút mà không mất kết nối </h>
+
+
+import IPython
+from google.colab import output
+
+display(IPython.display.Javascript('''
+ function ClickConnect(){
+   btn = document.querySelector("colab-connect-button")
+   if (btn != null){
+     console.log("Click colab-connect-button");
+     btn.click()
+     }
+
+   btn = document.getElementById('ok')
+   if (btn != null){
+     console.log("Click reconnect");
+     btn.click()
+     }
+  }
+
+setInterval(ClickConnect,60000)
+'''))
+
+print("Done.")
+
+# Kết nối với các file google drive
+#@markdown <font size=4px color="green"> --> Mount google drive </font>
+from google.colab import drive
+drive.mount('/content/drive',force_remount=True)
+
+from IPython.display import HTML, clear_output
+clear_output()
+print("Mount ổ đĩa thành công")
+
+# Copy 1 thư mục từ Driver này sang Driver khác update
+#@markdown <font size=4px color="RED"> NHỚ THÊM DẤU "/" Ở CUỐI SOURCE  </font>
+Source =  "" #@param {type:"string"}
+#@markdown <font size=4px color="RED"> VIẾT LUÔN TÊN FOLDER VÀO CUỐI NẾU ĐỂ FOLDER COPY Ở NGAY MYDRIVER  </font>
+Target =  "/content/drive/MyDrive/" #@param {type:"string"}
+import shutil
+
+error_count = 0 # Biến đếm số lượng các file bị lỗi khi sao chép
+error_files = [] # Danh sách các file bị lỗi khi sao chép
+
+# Định nghĩa hàm sao chép từng file và kiểm tra ngoại lệ
+def copy_file(src, dst):
+  global error_count # Sử dụng biến toàn cục error_count
+  global error_files # Sử dụng biến toàn cục error_files
+  try:
+    shutil.copy2(src, dst) # Sao chép từng file từ src tới dst
+    print(f"Copy thành công {src}")
+  except Exception as e: # Nếu xảy ra ngoại lệ, bắt và xử lý
+    print(f"Copy thất bại {src}")
+    print(f"Lỗi: {e}")
+    error_count += 1 # Tăng biến đếm số lượng các file bị lỗi
+    error_files.append(src) # Thêm file bị lỗi vào danh sách
+
+# Sử dụng hàm shutil.copytree() với hàm copy_function là hàm copy_file đã định nghĩa
+shutil.copytree(Source, Target, copy_function=copy_file)
+
+# In ra số lượng và danh sách các file bị lỗi khi sao chép
+print(f"Số lượng các file bị lỗi khi Copy: {error_count}")
+print(f"Danh sách các file bị lỗi khi Copy: {error_files}")
+
+# Copy 1 thư mục từ Driver này sang Driver khác
+#@markdown <font size=4px color="RED"> NHỚ THÊM DẤU "/" Ở CUỐI SOURCE  </font>
+Source =  "/content/drive/MyDrive/Backup shortcut/Le\u0323\u0302/" #@param {type:"string"}
+#@markdown <font size=4px color="RED"> VIẾT LUÔN TÊN FOLDER VÀO CUỐI NẾU ĐỂ FOLDER COPY Ở NGAY MYDRIVER  </font>
+Target =  "/content/drive/MyDrive/Backup l\xEA\u0323" #@param {type:"string"}
+
+!sudo cp -v -r -n "$Source" "$Target"
+
+
+# Hoac dung lenh sau
+#@markdown <font size=4px color="RED"> NHỚ THÊM DẤU "/" Ở CUỐI SOURCE  </font>
+Source =  "" #@param {type:"string"}
+#@markdown <font size=4px color="RED"> VIẾT LUÔN TÊN FOLDER VÀO CUỐI NẾU ĐỂ FOLDER COPY Ở NGAY MYDRIVER  </font>
+Target =  "/content/drive/MyDrive/" #@param {type:"string"}
+
+# Copy the shared folder to the new folder
+import shutil
+shutil.copytree(Source, Target)
